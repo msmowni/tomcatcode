@@ -1,0 +1,33 @@
+    - name: Install JAVA
+      command: yum install java-1.8.0-openjdk-devel -y
+    - name: Create a Tomcat Directory
+      file:
+        path: /opt/tomcat
+        mode: '0755'
+        state: directory
+    - name: download and un archive the file
+      unarchive:
+        src: "http://www-eu.apache.org/dist/tomcat/tomcat-8/v{{Version}}/bin/apache-tomcat-{{Version}}.tar.gz"
+        dest: /opt/tomcat
+        extra_opts: [--strip-components=1]
+        remote_src: yes
+    - name: configure servers.xml file
+      template:
+        src: server.xml.j2
+        dest: /opt/tomcat/conf/server.xml
+    - name: configure context.xml file
+      template:
+        src: context.xml.j2
+        dest: /opt/tomcat/webapps/manager/META-INF/context.xml
+    - name: configure tomcat-users.xml file
+      template:
+        src: tomcat-users.xml.j2
+        dest: /opt/tomcat/conf/tomcat-users.xml
+    - name: configure tomcat service
+      template:
+        src: tomcat-service.j2
+        dest: /etc/systemd/system/tomact-service.service
+    - name: restart tomcat
+      systemd:
+        name: tomact-service.service
+        state: restarted
